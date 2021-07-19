@@ -1,0 +1,11 @@
+.ic__container {
+    width: 1200px;
+    margin: 0 auto;
+    
+    .ic__welcome {
+        &--title {
+            text-align: center;
+            margin-top: 40px;
+        }
+    }
+}
