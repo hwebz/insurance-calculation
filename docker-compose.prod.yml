@@ -1,0 +1,40 @@
+version: "3"
+
+## TODO work out production architecture (add nginx proxy)
+## TODO work out testing?
+
+services:
+    ##########################
+    ### SETUP SERVER CONTAINER
+    ##########################
+    server:
+        build:
+            context: ./server
+            dockerfile: Dockerfile-prod
+        environment:
+            - API_URL=${API_URL}
+            - PORT=${PORT}
+            - VIRTUAL_HOST=${SERVER_VIRTUAL_HOST}
+        ports:
+            - ${PORT}:${PORT}
+        volumes:
+            # Map client src to server src to hot reload
+            - ./server/src:/app/server/src
+        command: npm run build
+        restart: always
+    ##########################
+    ### SETUP CLIENT CONTAINER
+    ##########################
+    client:
+        build:
+            context: ./client
+            dockerfile: Dockerfile-prod
+        ports:
+            - 80:80
+        links:
+            - server
+        restart: always
+# Add this to include data volume for mongo
+# Confirm this is working later
+volumes:
+  ? board-dbdata

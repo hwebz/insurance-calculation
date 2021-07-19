@@ -15,11 +15,6 @@ cp .env.example .env
 ## DEVELOPMENT
 
 ```
-docker-compose -f dev-docker-compose.yml up --build
-```
-## PRODUCTION
-
-```
 docker-compose up --build
 ```
 

@@ -1,36 +1,51 @@
 version: "3"
 
-## TODO work out production architecture (add nginx proxy)
-## TODO work out testing?
-
 services:
     ##########################
     ### SETUP SERVER CONTAINER
     ##########################
     server:
+        # Tell docker what file to build the server from
         build: ./server
+        # The ports to expose
+        expose:
+            - 4000
+        # Environment variables
         environment:
             - API_URL=${API_URL}
-            - PORT=${PORT}
-            - VIRTUAL_HOST=${SERVER_VIRTUAL_HOST}
+            - PORT=4000
+            - JWT_SECRET=secretsecret
+            - JWT_EXPIRY=30d
+            - DEBUG=worker:*
+            - MORGAN=combined
+            - NODE_ENV=development
+        # Port mapping
         ports:
-            - ${PORT}:${PORT}
+            - 4000:4000
+        # Volumes to mount
         volumes:
-            # Map client src to server src to hot reload
             - ./server/src:/app/server/src
-        command: node src/server.js
+        # Run command
+        # Nodemon for hot reloading (-L flag required for polling in Docker)
+        command: npm start
+        # Restart action
         restart: always
     ##########################
     ### SETUP CLIENT CONTAINER
     ##########################
     client:
         build: ./client
+        environment:
+            - REACT_APP_PORT=3000
+            - CHOKIDAR_USEPOLLING=true
+        expose: 
+            - 3000
         ports:
-            - 80:80
-        links:
+            - 3000:3000
+        volumes:
+            - ./client/src:/app/client/src
+            - ./client/public:/app/client/public
+        links: 
             - server
+        command: npm start
         restart: always
-# Add this to include data volume for mongo
-# Confirm this is working later
-volumes:
-  ? board-dbdata

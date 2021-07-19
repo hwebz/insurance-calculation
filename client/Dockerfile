@@ -1,30 +1,24 @@
-# Build in this container
-FROM node:14-alpine as builder
+# client/Dockerfile
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+# This is the build file for the client module, Docker will use this to setup the client container image.
 
-COPY package* /usr/src/app/
+# Installs the node image
+FROM node
 
-# Set production flag so dev dependencies aren't installed
-RUN npm install --production=true
+# Creates the client directory in the container
+RUN mkdir -p /app/client
 
-COPY . /usr/src/app/
+# Sets the working directory to the client directory
+WORKDIR /app/client
 
-# Build the production build
-RUN npm run build
+# Copies the package.json to the container
+COPY package*.json /app/client/
 
-# Start and nginx container
-FROM nginx
+# Installs the client dependencies
+RUN npm install
 
-# Set our custom nginx.conf in the container
-RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/nginx.conf
+# Copies the files from the client directory to the container
+COPY . /app/client/
 
-# Copy the react build from the build container
-COPY --from=builder /usr/src/app/build /usr/share/nginx/html
-
-# Set permissions so nginx can serve it
-RUN chown nginx.nginx /usr/share/nginx/html/ -R
-
-EXPOSE 80
+# Runs the client
+CMD ["npm", "start"]

@@ -1,28 +1,24 @@
-FROM node:14-alpine as builder
+# server/Dockerfile-dev
 
-RUN mkdir -p /app/server
+# Install node image in container
+FROM node
+
+# Install nodemon for hot reloading
+RUN npm install -g nodemon
+RUN npm install -g ts-node
+
+# Create and set the working directory
+RUN mkdir -p app/server
 WORKDIR /app/server
 
-COPY package* /app/server/
-
-# Install the build requirements for bcrypt
-RUN apk update && apk upgrade \
-    && apk --no-cache add --virtual builds-deps build-base python \
-    && npm install node-gyp node-pre-gyp
+# Copies the dependency files over
+COPY package*.json /app/server/
 
 # Install dependencies
-RUN npm install --production=true
+RUN npm install
 
 # Copies the server files over
 COPY . /app/server/
 
-FROM node:14-alpine
-
-# Create and set the working directory
-RUN mkdir -p /app/server
-WORKDIR /app/server
-
-# Copy the server from the build container
-COPY --from=builder /app/server /app/server
-
-CMD ["node", "server.js"]
+# Command to run them
+cmd ["npm", "start"]
